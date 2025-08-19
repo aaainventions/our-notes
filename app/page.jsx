@@ -7,7 +7,7 @@ export default function NotesPage() {
   const [notes, setNotes] = useState([]);
   const [text, setText] = useState("");
   const [author, setAuthor] = useState("Muaaz");
-  const [filter, setFilter] = useState("all");
+  const [filter, setFilter] = useState("pending");
   const [search, setSearch] = useState("");
   const [editingId, setEditingId] = useState(null); // ID of the note being edited
   const [editText, setEditText] = useState(""); // text while editing
