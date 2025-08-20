@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 
 export default function LoginPage() {
-  const [username, setUsername] = useState("");
+  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const router = useRouter();
@@ -12,14 +12,13 @@ export default function LoginPage() {
   const handleLogin = async (e) => {
     e.preventDefault();
 
-    const res = await fetch("/api/auth", {
+    const res = await fetch("/api/login", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ username, password }),
+      body: JSON.stringify({ email, password }),
     });
 
     if (res.ok) {
-      // Login successful → redirect to notes page
       router.push("/");
     } else {
       setError("Invalid credentials");
@@ -27,42 +26,35 @@ export default function LoginPage() {
   };
 
   return (
-    <div style={styles.container}>
-      <h1>Login</h1>
-      <form onSubmit={handleLogin} style={styles.form}>
-        <input
-          type="text"
-          placeholder="Username"
-          value={username}
-          onChange={(e) => setUsername(e.target.value)}
-          style={styles.input}
-        />
-        <input
-          type="password"
-          placeholder="Password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          style={styles.input}
-        />
-        <button type="submit" style={styles.button}>
-          Login
-        </button>
-        {error && <p style={{ color: "red" }}>{error}</p>}
-      </form>
+    <div className="flex min-h-screen items-center justify-center bg-gray-950">
+      <div className="w-full max-w-md p-8 bg-gray-900 rounded-2xl shadow-lg">
+        <h1 className="text-2xl font-bold text-white text-center mb-6">Login</h1>
+        <form onSubmit={handleLogin} className="space-y-4">
+          <input
+            type="email"
+            placeholder="Email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            className="w-full px-4 py-2 rounded-lg bg-gray-800 text-white border border-gray-700 focus:ring-2 focus:ring-blue-500 outline-none"
+            required
+          />
+          <input
+            type="password"
+            placeholder="Password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            className="w-full px-4 py-2 rounded-lg bg-gray-800 text-white border border-gray-700 focus:ring-2 focus:ring-blue-500 outline-none"
+            required
+          />
+          <button
+            type="submit"
+            className="w-full bg-blue-600 hover:bg-blue-700 text-white py-2 rounded-lg transition font-medium"
+          >
+            Login
+          </button>
+        </form>
+        {error && <p className="text-red-500 text-sm mt-3 text-center">{error}</p>}
+      </div>
     </div>
   );
 }
-
-const styles = {
-  container: { maxWidth: "400px", margin: "100px auto", textAlign: "center" },
-  form: { display: "flex", flexDirection: "column", gap: "10px" },
-  input: { padding: "10px", borderRadius: "4px", border: "1px solid #ccc" },
-  button: {
-    padding: "10px",
-    borderRadius: "4px",
-    border: "none",
-    backgroundColor: "#4CAF50",
-    color: "#fff",
-    cursor: "pointer",
-  },
-};
