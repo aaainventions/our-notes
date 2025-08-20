@@ -17,14 +17,16 @@ export default function NotesPage() {
     setNotes(res.data);
   };
 
-  const addNote = async () => {
-    if (!text.trim()) return;
-    const noteText = `${author}: "${text}"`;
-    await axios.post("/api/notes", { text: noteText });
-    setText("");
-    setAuthor("Muaaz");
-    fetchNotes();
-  };
+const addNote = async () => {
+  if (!text.trim()) return;
+  const noteText = `${author}: "${text}"`;
+
+  await axios.post("/api/notes", { text: noteText });
+  setText("");
+  setAuthor("Muaaz");
+  fetchNotes();
+};
+
 
   const updateNote = async (id, newText, done) => {
     await axios.put(`/api/notes/${id}`, { text: newText, done });
@@ -144,9 +146,24 @@ export default function NotesPage() {
                   {note.text}
                 </span>
               )}
-              <div style={{ fontSize: "12px", color: "#999", marginTop: "3px" }}>
-                {note.date}
-              </div>
+<div
+  style={{
+    fontSize: "12px",
+    color: "#888",
+    marginTop: "4px",
+    fontStyle: "italic",
+    letterSpacing: "0.3px",
+  }}
+>
+  {new Date(note.date).toLocaleDateString()}{" "}
+  {new Date(note.date).toLocaleTimeString([], {
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: true, // 👈 forces AM/PM
+  })}
+</div>
+
+
             </div>
             <div style={styles.actions}>
               <button
@@ -311,4 +328,5 @@ const styles = {
     outline: "none",
     fontSize: "14px",
   },
+
 };

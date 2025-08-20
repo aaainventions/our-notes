@@ -11,7 +11,10 @@ export async function GET() {
 export async function POST(req) {
   await dbConnect();
   const { text } = await req.json();
-  const today = new Date().toLocaleDateString();
-  const note = await Note.create({ text, date: today, done: false });
+  const note = await Note.create({
+    text,
+    date: new Date(), // 👈 full datetime, not just the date
+    done: false,
+  });
   return NextResponse.json(note);
 }
