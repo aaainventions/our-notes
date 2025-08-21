@@ -9,28 +9,38 @@ export default function NotesPage() {
   const [author, setAuthor] = useState("Muaaz");
   const [filter, setFilter] = useState("pending");
   const [search, setSearch] = useState("");
-  const [editingId, setEditingId] = useState(null); // ID of the note being edited
-  const [editText, setEditText] = useState(""); // text while editing
+  const [editingId, setEditingId] = useState(null);
+  const [editText, setEditText] = useState("");
 
   const fetchNotes = async () => {
     const res = await axios.get("/api/notes");
     setNotes(res.data);
   };
 
-const addNote = async () => {
-  if (!text.trim()) return;
-  const noteText = `${author}: "${text}"`;
+  const addNote = async () => {
+    if (!text.trim()) return;
+    const noteText = `${author}: "${text}"`;
 
-  await axios.post("/api/notes", { text: noteText });
-  setText("");
-  setAuthor("Muaaz");
-  fetchNotes();
-};
+    await axios.post("/api/notes", { text: noteText });
+    setText("");
+    setAuthor("Muaaz");
+    fetchNotes();
+  };
 
-
-  const updateNote = async (id, newText, done) => {
-    await axios.put(`/api/notes/${id}`, { text: newText, done });
+  // ✅ Fix: unified update function for marking done & editing
+  const updateNote = async (noteId, updatedText, done) => {
+    const user = JSON.parse(sessionStorage.getItem("user"));
+    await fetch(`/api/notes/${noteId}`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        text: updatedText,
+        done,
+        doneBy: done ? user?.name || "" : "", // store who marked done
+      }),
+    });
     setEditingId(null);
+    setEditText("");
     fetchNotes();
   };
 
@@ -49,7 +59,9 @@ const addNote = async () => {
       (filter === "pending" && !note.done) ||
       (filter === "done" && note.done);
 
-    const matchesSearch = note.text.toLowerCase().includes(search.toLowerCase());
+    const matchesSearch = note.text
+      .toLowerCase()
+      .includes(search.toLowerCase());
     return matchesFilter && matchesSearch;
   });
 
@@ -58,25 +70,15 @@ const addNote = async () => {
       <h1 style={styles.heading}>Notes Dashboard</h1>
 
       <div style={styles.topBar}>
-        {/* <button
-          onClick={() => {
-            document.cookie = "loggedIn=; Max-Age=0; path=/";
+        <button
+          onClick={async () => {
+            await fetch("/api/logout", { method: "POST" });
             window.location.href = "/login";
           }}
-          style={styles.logoutButton}
+          className=" bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg transition"
         >
           Logout
-        </button> */}
-        <button
-  onClick={async () => {
-    await fetch("/api/logout", { method: "POST" });
-    window.location.href = "/login";
-  }}
-  className=" bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg transition"
->
-  Logout
-</button>
-
+        </button>
 
         <input
           type="text"
@@ -146,24 +148,29 @@ const addNote = async () => {
                   {note.text}
                 </span>
               )}
-<div
-  style={{
-    fontSize: "12px",
-    color: "#888",
-    marginTop: "4px",
-    fontStyle: "italic",
-    letterSpacing: "0.3px",
-  }}
->
-  {new Date(note.date).toLocaleDateString()}{" "}
-  {new Date(note.date).toLocaleTimeString([], {
-    hour: "2-digit",
-    minute: "2-digit",
-    hour12: true, // 👈 forces AM/PM
-  })}
-</div>
-
-
+              <div
+                style={{
+                  fontSize: "12px",
+                  color: "#888",
+                  marginTop: "4px",
+                  fontStyle: "italic",
+                  letterSpacing: "0.3px",
+                }}
+              >
+                {new Date(note.date).toLocaleDateString()}{" "}
+                {new Date(note.date).toLocaleTimeString([], {
+                  hour: "2-digit",
+                  minute: "2-digit",
+                  hour12: true, // ✅ AM/PM
+                })}
+              </div>
+              {note.done && note.doneBy && (
+                <div
+                  style={{ fontSize: "11px", color: "#666", marginTop: "2px" }}
+                >
+                  Done by {note.doneBy}
+                </div>
+              )}
             </div>
             <div style={styles.actions}>
               <button
@@ -328,5 +335,4 @@ const styles = {
     outline: "none",
     fontSize: "14px",
   },
-
 };

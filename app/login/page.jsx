@@ -19,6 +19,9 @@ export default function LoginPage() {
     });
 
     if (res.ok) {
+      const user = await res.json();
+      // ✅ store user in sessionStorage so we can track "done by"
+      sessionStorage.setItem("user", JSON.stringify(user));
       router.push("/");
     } else {
       setError("Invalid credentials");
@@ -53,7 +56,9 @@ export default function LoginPage() {
             Login
           </button>
         </form>
-        {error && <p className="text-red-500 text-sm mt-3 text-center">{error}</p>}
+        {error && (
+          <p className="text-red-500 text-sm mt-3 text-center">{error}</p>
+        )}
       </div>
     </div>
   );
